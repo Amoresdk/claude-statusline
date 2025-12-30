@@ -1,0 +1,66 @@
+{
+  "quota_per_unit": 500000,
+  "group_ratio": 1.0,
+  "models": {
+    "claude-opus-4-5": {
+      "model_ratio": 2.67,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-opus-4-1": {
+      "model_ratio": 2.67,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-opus-4": {
+      "model_ratio": 2.67,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-sonnet-4-5": {
+      "model_ratio": 1.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-sonnet-4": {
+      "model_ratio": 1.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-3-7-sonnet": {
+      "model_ratio": 1.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-3-5-sonnet": {
+      "model_ratio": 1.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-haiku-4-5": {
+      "model_ratio": 0.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    },
+    "claude-3-5-haiku": {
+      "model_ratio": 0.5,
+      "completion_ratio": 5,
+      "cache_ratio": 0.1,
+      "cache_creation_ratio": 1.25
+    }
+  },
+  "default": {
+    "model_ratio": 2.67,
+    "completion_ratio": 5,
+    "cache_ratio": 0.1,
+    "cache_creation_ratio": 1.25
+  }
+}
