@@ -72,23 +72,24 @@ WHITE='\033[0;37m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-# 根据今日费用设置颜色
-if (( $(echo "$today_cost > 1" | bc -l) )); then
-    today_color="$RED"
-elif (( $(echo "$today_cost > 0.5" | bc -l) )); then
-    today_color="$YELLOW"
-else
-    today_color="$GREEN"
-fi
+# 使用 Python 获取颜色（替代 bc，提高跨平台兼容性）
+get_cost_color() {
+    local cost=$1
+    local yellow_threshold=$2
+    local red_threshold=$3
+    python3 -c "
+cost = float('$cost' or 0)
+if cost > $red_threshold:
+    print('\033[0;31m', end='')  # RED
+elif cost > $yellow_threshold:
+    print('\033[0;33m', end='')  # YELLOW
+else:
+    print('\033[0;32m', end='')  # GREEN
+"
+}
 
-# 根据会话费用设置颜色
-if (( $(echo "$session_cost > 0.5" | bc -l) )); then
-    session_color="$RED"
-elif (( $(echo "$session_cost > 0.2" | bc -l) )); then
-    session_color="$YELLOW"
-else
-    session_color="$GREEN"
-fi
+today_color=$(get_cost_color "$today_cost" 0.5 1)
+session_color=$(get_cost_color "$session_cost" 0.2 0.5)
 
 # 构建状态栏
 echo -ne "${CYAN}${short_cwd}${RESET}${git_branch} ${BLUE}[${model}]${RESET} ${MAGENTA}${output_style}${RESET} "

@@ -11,15 +11,24 @@
 - **增量更新**：高效的增量计算，不重复统计
 - **自定义计费**：支持配置不同 API 服务商的计费规则
 - **颜色提示**：根据费用高低显示不同颜色
+- **跨平台支持**：同时支持 macOS/Linux 和 Windows
 
 ## 系统要求
 
-- macOS / Linux
+### macOS / Linux
+
 - Python 3.6+
 - jq（JSON 处理工具）
-- bc（数学计算工具）
+- Bash
+
+### Windows
+
+- Python 3.6+
+- PowerShell 5.1+
 
 ## 安装
+
+### macOS / Linux
 
 ```bash
 git clone https://github.com/your-username/claude-statusline.git
@@ -28,9 +37,25 @@ chmod +x install.sh
 ./install.sh
 ```
 
+### Windows
+
+```powershell
+git clone https://github.com/your-username/claude-statusline.git
+cd claude-statusline
+.\install.ps1
+```
+
+> **注意**：如果遇到 PowerShell 执行策略限制，请先运行：
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
+
 ## 配置计费规则
 
-安装后，编辑 `~/.claude/pricing_config.json` 配置你的计费规则：
+安装后，编辑计费配置文件：
+
+- **macOS/Linux**: `~/.claude/pricing_config.json`
+- **Windows**: `%USERPROFILE%\.claude\pricing_config.json`
 
 ```json
 {
@@ -79,24 +104,36 @@ cost = quota / quota_per_unit
 
 ## 文件说明
 
-```
-~/.claude/
-├── statusline.sh              # 状态栏主脚本
-├── calculate_today_stats.py   # 费用计算脚本
-├── pricing_config.json        # 计费规则配置
-├── usage_state.json           # 统计状态（自动生成）
-└── settings.json              # Claude Code 设置
-```
+安装后文件位于 `~/.claude/`（Windows: `%USERPROFILE%\.claude\`）：
+
+| 文件 | macOS/Linux | Windows | 说明 |
+|------|-------------|---------|------|
+| 状态栏脚本 | `statusline.sh` | `statusline.py` | 主脚本 |
+| 计费脚本 | `calculate_today_stats.py` | `calculate_today_stats.py` | 费用计算 |
+| 核心模块 | `core/` | `core/` | 跨平台模块 |
+| 计费配置 | `pricing_config.json` | `pricing_config.json` | 用户配置 |
+| 统计状态 | `usage_state.json` | `usage_state.json` | 自动生成 |
 
 ## 卸载
+
+### macOS / Linux
 
 ```bash
 ./uninstall.sh
 ```
 
+### Windows
+
+```powershell
+.\uninstall.ps1
+```
+
 ## 自定义状态栏
 
-如需自定义显示内容，编辑 `~/.claude/statusline.sh`。
+如需自定义显示内容：
+
+- **macOS/Linux**: 编辑 `~/.claude/statusline.sh`
+- **Windows**: 编辑 `%USERPROFILE%\.claude\statusline.py`
 
 状态栏脚本接收 JSON 格式的上下文数据，包含：
 - `model.display_name` - 当前模型名称
@@ -111,13 +148,27 @@ cost = quota / quota_per_unit
 
 ### Q: 状态栏不显示？
 
+**macOS/Linux:**
 1. 确保 `~/.claude/settings.json` 包含 statusLine 配置
 2. 检查脚本权限：`chmod +x ~/.claude/statusline.sh`
 3. 测试脚本：`echo '{}' | ~/.claude/statusline.sh`
 
+**Windows:**
+1. 确保 `%USERPROFILE%\.claude\settings.json` 包含 statusLine 配置
+2. 测试脚本：`echo '{}' | python ~/.claude/statusline.py`
+
 ### Q: 如何重置统计？
 
-删除状态文件：`rm ~/.claude/usage_state.json`
+删除状态文件：
+- **macOS/Linux**: `rm ~/.claude/usage_state.json`
+- **Windows**: `del %USERPROFILE%\.claude\usage_state.json`
+
+### Q: Windows 上 PowerShell 脚本无法执行？
+
+运行以下命令设置执行策略：
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
 ## License
 

@@ -12,14 +12,24 @@ Claude Code 状态栏计费统计脚本（增量更新版）
 """
 import json
 import os
-import fcntl
+import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+# 添加 core 模块路径（支持直接运行和从 ~/.claude 运行）
+script_dir = Path(__file__).parent
+if (script_dir / 'core').exists():
+    sys.path.insert(0, str(script_dir))
+elif (script_dir.parent / 'scripts' / 'core').exists():
+    sys.path.insert(0, str(script_dir.parent / 'scripts'))
+
+from core.file_lock import lock_file, unlock_file
+from core.paths import get_claude_dir, find_project_dir
 
 
 def load_pricing_config():
     """加载模型费率配置"""
-    config_path = Path.home() / '.claude' / 'pricing_config.json'
+    config_path = get_claude_dir() / 'pricing_config.json'
     if config_path.exists():
         with open(config_path, 'r') as f:
             return json.load(f)
@@ -85,7 +95,7 @@ def calculate_cost(usage, model_id, pricing_config):
 
 def load_state():
     """加载状态文件"""
-    state_path = Path.home() / '.claude' / 'usage_state.json'
+    state_path = get_claude_dir() / 'usage_state.json'
     if state_path.exists():
         try:
             with open(state_path, 'r') as f:
@@ -105,11 +115,11 @@ def load_state():
 
 def save_state(state):
     """保存状态文件（带文件锁）"""
-    state_path = Path.home() / '.claude' / 'usage_state.json'
+    state_path = get_claude_dir() / 'usage_state.json'
     with open(state_path, 'w') as f:
-        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        lock_file(f)
         json.dump(state, f, indent=2)
-        fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        unlock_file(f)
 
 
 def get_today_string():
@@ -124,7 +134,7 @@ def get_today_start_timestamp():
     beijing_today = datetime.now(beijing_tz).date()
 
     # 检查手动重置时间戳
-    reset_file = Path.home() / '.claude' / 'reset_timestamp.txt'
+    reset_file = get_claude_dir() / 'reset_timestamp.txt'
     if reset_file.exists():
         try:
             with open(reset_file, 'r') as f:
@@ -142,23 +152,10 @@ def find_current_session():
     """查找当前工作目录对应的会话文件"""
     cwd = os.getcwd()
 
-    # 构建项目目录路径
-    project_dir_name = cwd.replace('/', '-').replace(':', '')
-    if project_dir_name.startswith('-'):
-        project_dir_name = project_dir_name[1:]
+    # 使用跨平台路径处理查找项目目录
+    claude_project_dir = find_project_dir(cwd)
 
-    claude_project_dir = Path.home() / '.claude' / 'projects' / f"-{project_dir_name}"
-
-    # 模糊匹配
-    if not claude_project_dir.exists():
-        projects_dir = Path.home() / '.claude' / 'projects'
-        if projects_dir.exists():
-            for d in projects_dir.iterdir():
-                if d.is_dir() and cwd.split('/')[-1] in d.name:
-                    claude_project_dir = d
-                    break
-
-    if not claude_project_dir.exists():
+    if not claude_project_dir or not claude_project_dir.exists():
         return None, None
 
     # 找到最新的会话文件（排除 agent 开头的）
@@ -233,7 +230,7 @@ def scan_today_files():
     beijing_tz = timezone(timedelta(hours=8))
     beijing_today = datetime.now(beijing_tz).date()
 
-    projects_dir = Path.home() / '.claude' / 'projects'
+    projects_dir = get_claude_dir() / 'projects'
     if not projects_dir.exists():
         return []
 
